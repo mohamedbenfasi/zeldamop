@@ -1,0 +1,15 @@
+{
+  "name": "zeldajs",
+  "version": "1.0.0",
+  "description": "tutorials on Zelda game with Phaser",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "keywords": [
+    "zelda",
+    "phaser"
+  ],
+  "author": "Nazim Boudeffa",
+  "license": "ISC"
+}
