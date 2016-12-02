@@ -1,7 +1,7 @@
 To launch the game it's simple
 
 cd game/
-npm install
+npm install electron
 node_modules/.bin/electron index.js
 
 ==========
