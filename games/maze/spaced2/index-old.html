@@ -1,5 +1,7 @@
 <html>
-	<head>
+
+<!-- Mirrored from kal-rul.com/spaced2/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 22 Dec 2016 15:44:39 GMT -->
+<head>
 		<script type="text/javascript" src="../JS/jquery.js"></script>
 		<script type="text/javascript" src="../JS/community-v2/phaser.min.js"></script>
 		<title>Spaced!</title>
@@ -7,7 +9,7 @@
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		  })(window,document,'script','../../www.google-analytics.com/analytics.js','ga');
 
 		  ga('create', 'UA-87208405-2', 'auto');
 		  ga('send', 'pageview');
@@ -25,129 +27,55 @@
 			var orangeCounter = -1;
 			var blueCounter = -1;
 			var greenCounter = -1;
-			var floorCounter = -1;
 			var door;
-			var crumbleFlag = 0;
-			var menuBar;
-			var menuName;
-			var levelName;
-			var muteButton;
-			var muted = false;
-			var unlocked = 15;
-			var resetButton;
-			var levels = ["B-1", "B-2", "B-3", "B-4", "B-5", "Y-1", "Y-2", "Y-3", "Y-4", "Y-5", "R-1", "R-2", "R-3", "R-4", "R-5"];
-			var level = 0;
-			var levelButtons = new Array(8);
 
-			menu_state = {
+			game = new Phaser.Game(640, 640, Phaser.AUTO, 'wrapper');
+
+			main_state = {
 				preload : function() {
-					game.load.image('mute', 'mute.png');
-					game.load.image('unmute', 'unmute.png');
-					game.load.image('bg', 'bg.png');
-					game.load.image('logo', 'mop_ce_logo1-300.png');
-					$.each( levels, function( key, value ) {
-						game.load.spritesheet(value, value + '.png', 48, 48);
-					});
-				},
-				create : function() {
-					game.stage.backgroundColor = '#000000';
-					bg = game.add.sprite(0, 0, 'bg');
-					menuBar = game.add.sprite(195, 40, 'logo');
-					muteButton = game.add.button(614, 622, 'unmute', muteSound, this, 2, 1, 0);
-					if(muted){
-						muteButton.loadTexture("mute");
-					}
-
-					x = 104;
-					y = 300;
-					$.each( levels, function( key, value ) {
-
-
-						if (key == unlocked){
-							levelButtons[key] = game.add.button(x, y, value, startLevel, this, 1, 0, 0);
-							levelButtons[key].variable = key;
-						}else if (key < unlocked){
-							levelButtons[key] = game.add.button(x, y, value, startLevel, this, 1, 3, 0);
-							levelButtons[key].variable = key;
-						}else{
-							levelButtons[key] = game.add.button(x, y, value, startLevel, this, 2, 2, 0);
-							levelButtons[key].inputEnabled = false;
-							levelButtons[key].cursor = "default";
-						}
-						x = x + 96;
-						if(key == 4 || key == 9){
-							y = y + 96;
-							x = 104;
-						}
-					});
-
-				}
-			},
-			play_state = {
-				preload : function() {
-					game.load.tilemap(levels[level], levels[level] + '.json', null, Phaser.Tilemap.TILED_JSON);
+					game.load.tilemap('blue1', 'blue3.json', null, Phaser.Tilemap.TILED_JSON);
+					game.load.tilemap('blue2', 'yellow5.json', null, Phaser.Tilemap.TILED_JSON);
 					game.load.image('mazeBlue', 'mazeBlue.png');
-					game.load.image('menuBar', 'menuBar.png');
-					game.load.image('mute', 'mute.png');
-					game.load.image('unmute', 'unmute.png');
 					game.load.image('mazeYellow', 'mazeYellow.png');
 					//game.load.spritesheet('walker', 'sprite.png', 48, 48);
-          game.load.spritesheet('link', 'walking.tunic.png', 24, 32, 55);
-					game.load.spritesheet('reset', 'reset.png', 16, 16);
+					game.load.spritesheet('link', 'walking.tunic.png', 24, 32, 55);
 					game.load.image('bg', 'bg.png');
 					game.load.audio('door', 'door.wav');
 				},
 				create : function() {
-					game.stage.backgroundColor = '#000000';
 					door = game.add.audio('door');
-					map = game.add.tilemap(levels[level]);
+					map = game.add.tilemap('blue2');
 					game.stage.backgroundColor = '#FFFFFF';
 					map.addTilesetImage('mazeBlue', 'mazeBlue');
 					map.addTilesetImage('mazeYellow', 'mazeYellow');
 					bg = game.add.sprite(0, 0, 'bg');
-
 					layer2 = map.createLayer(0);
 					layer = map.createLayer('Walls');
 					layer.resizeWorld();
 					map.setCollisionBetween(1, 99);
 					tile = map.searchTileIndex(49,0,false,layer);
-          /*
+
+					/*
+					Here we replace the player texture with the Link one
+					*/
+					
+					/*
 					player = game.add.sprite(tile.x * 32 - 8,tile.y * 32 - 8, 'walker', 1);
 					player.animations.add('left', [8,9,10,11,12,13,14,15], 7, true);
 					player.animations.add('right', [24,25,26,27,28,29,30,31], 7, true);
 					player.animations.add('up', [0,1,2,3,4,5,6,7], 7, true);
 					player.animations.add('down', [16,17,18,19,20,21,22,23], 7, true);
-          */
-          player = game.add.sprite(tile.x * 32 - 8,tile.y * 32 - 8, 'link', 1);
-          player.animations.add('right', [0, 1, 2, 3, 4, 5, 6, 7], 16, false);
-          player.animations.add('up', [12, 13, 14, 15, 16, 17, 18], 16, false);
-          player.animations.add('left', [33, 34, 35, 36, 37, 38, 39, 40], 16, false);
-          player.animations.add('down', [44, 45, 46, 47, 48, 49, 50, 51], 16, false);
+					*/
+					player = game.add.sprite(tile.x * 32 - 8,tile.y * 32 - 8, 'link', 1);
+					//player.scale.set(2);
+					//player.smoothed = false;
 
-					menuBar = game.add.sprite(0, 612, 'menuBar');
-					menuName = game.add.text(290, 622, "SPACED II", { font: "12px Gadget", fill: "#ff1925", align: "center", weight: "bold" });
-					menuName.fixedToCamera = true;
-					menuName.fontWeight = 'bold';
-					levelName = game.add.text(520, 622, "LEVEL: " + levels[level], { font: "12px Gadget", fill: "#ff1925", align: "center", weight: "bold" });
-					levelName.fixedToCamera = true;
-					levelName.fontWeight = 'bold';
-					mainMenu = game.add.text(30, 622, "MAIN MENU", { font: "12px Gadget", fill: "#ff1925", align: "center", weight: "bold" });
-					mainMenu.inputEnabled = true;
-					mainMenu.fixedToCamera = true;
-					mainMenu.fontWeight = 'bold';
-					mainMenu.events.onInputUp.add(returnToMenu, this);
-					mainMenu.input.useHandCursor = true;
-					muteButton = game.add.button(614, 622, 'unmute', muteSound, this, 2, 1, 0);
+					player.animations.add('right', [0, 1, 2, 3, 4, 5, 6, 7], 16, false);
+					player.animations.add('up', [12, 13, 14, 15, 16, 17, 18], 16, false);
+					player.animations.add('left', [33, 34, 35, 36, 37, 38, 39, 40], 16, false);
+					player.animations.add('down', [44, 45, 46, 47, 48, 49, 50, 51], 16, false);
+
 					game.physics.enable(player, Phaser.Physics.ARCADE);
-					resetButton = game.add.button(594, 622, 'reset', restart, this, 0, 0, 0);
-					resetButton.events.onInputOver.add(animateButton, this);
-					resetButton.events.onInputOut.add(unanimateButton, this);
-
-					if(muted){
-						muteButton.loadTexture("mute");
-					}
-
-					resetButton.animations.add("over", [2,3,4,5], 10, true);
 
 					player.body.setSize(20, 20 , 16, 16);
 
@@ -155,7 +83,7 @@
 
 					cursors = game.input.keyboard.createCursorKeys();
 
-					map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116,120,124], true, layer);
+					map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116], true, layer);
 
 					map.setTileIndexCallback(53, finish, this, layer);
 					map.setTileIndexCallback(54, finish, this, layer);
@@ -172,21 +100,14 @@
 
 					map.setTileIndexCallback(57, blueSwitch, this, layer);
 					map.setTileIndexCallback(60, blueSwitch, this, layer);
-
-					map.setTileIndexCallback(120, brokenFloor, this, layer);
-					map.setTileIndexCallback(124, brokenFloor, this, layer);
-
-					resetButton.fixedToCamera = true;
-					muteButton.fixedToCamera = true;
 					bg.fixedToCamera = true;
-					menuBar.fixedToCamera = true;
-					mainMenu.fixedToCamera = true;
+
 
 				},
 				update : function() {
 
 					counter++;
-					console.log(crumbleFlag);
+
 					if(counter == 10){
 						map.swap(49, 50, 0, 0, 100, 100, layer);
 						map.swap(53, 54, 0, 0, 100, 100, layer);
@@ -249,8 +170,8 @@
 							map.swap(85, 86, 0, 0, 100, 100, layer);  //V BAR
 							map.swap(87, 88, 0, 0, 100, 100, layer);  //V BAR
 
-							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116,120,124], true, layer);
-							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116,120,124], false, layer);
+							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116], true, layer);
+							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116], false, layer);
 							orangeCounter = -3;
 						}
 						orangeCounter++;
@@ -298,12 +219,13 @@
 							map.swap(-20 + 85, -20 + 86, 0, 0, 100, 100, layer);  //V BAR
 							map.swap(-20 + 87, -20 + 88, 0, 0, 100, 100, layer);  //V BAR
 
-							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116,120,124], true, layer);
-							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116,120,124], false, layer);
+							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116], true, layer);
+							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116], false, layer);
 							blueCounter = -3;
 						}
 						blueCounter++;
 					}
+
 
 					if(greenCounter > -1){
 						if(greenCounter == 0){
@@ -347,36 +269,11 @@
 							map.swap(20 + 85, 20 + 86, 0, 0, 100, 100, layer);  //V BAR
 							map.swap(20 + 87, 20 + 88, 0, 0, 100, 100, layer);  //V BAR
 
-							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116,120,124], true, layer);
-							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116,120,124], false, layer);
+							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116], true, layer);
+							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116], false, layer);
 							greenCounter = -3;
 						}
 						greenCounter++;
-					}
-
-					if(floorCounter > -1){
-						if(floorCounter == 0){
-
-							map.swap(120, 119, Math.floor(player.x / 32), Math.floor(player.y / 32), 3, 3, layer);  //SWITCH
-							map.swap(124, 123, Math.floor(player.x / 32), Math.floor(player.y / 32), 3, 3, layer);  //SWITCH
-
-						}
-						if(floorCounter == 10){
-
-							map.swap(118, 119, Math.floor(player.x / 32), Math.floor(player.y / 32), 3, 3, layer);  //SWITCH
-							map.swap(122, 123, Math.floor(player.x / 32), Math.floor(player.y / 32), 3, 3, layer);  //SWITCH
-
-						}
-						if(floorCounter == 20){
-
-							map.swap(118, 117, Math.floor(player.x / 32), Math.floor(player.y / 32), 3, 3, layer);  //SWITCH
-							map.swap(122, 121, Math.floor(player.x / 32), Math.floor(player.y / 32), 3, 3, layer);  //SWITCH
-
-							map.setCollisionByExclusion([49,50,51,52,53,54,55,56,57,58,59,60,64,68,72,76,77,78,79,80,84,88,92,96,97,98,99,100,104,108,112,116,120,124], true, layer);
-							map.setCollision([84,88,92,96,64,68,72,76,104,108,112,116,120,124], false, layer);
-							floorCounter = -2;
-						}
-						floorCounter++;
 					}
 
 					game.physics.arcade.collide(player, layer);
@@ -431,66 +328,37 @@
 					}
 
 				},
-				render : function() {
-
-				}
 			};
+			game.state.add('main', main_state);
+			game.state.start('main');
 
 
 			function finish(){
-				if(level >= unlocked){
-					unlocked = level + 1;
-				}
-				level++;
-				game.state.restart();
-			}
-
-			function animateButton(){
-				resetButton.play("over");
-			}
-
-			function unanimateButton(){
-               resetButton.animations.stop(null, false);
-               resetButton.frame = 0;
-           }
-
-			function restart(){
+				//level++;
 				game.state.restart();
 			}
 
 			function orangeSwitch(){
 				if(orangeCounter == -1 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) != null){
-					if(!muted){
-						door.play();
-					}
+					door.play();
 					orangeCounter = 0;
 				}
 			}
 
 			function greenSwitch(){
 				if(greenCounter == -1 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) != null){
-					if(!muted){
-						door.play();
-					}
+					door.play();
 					greenCounter = 0;
 				}
 			}
 
 			function blueSwitch(){
 				if(blueCounter == -1 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) != null){
-					if(!muted){
-						door.play();
-					}
+					door.play();
 					blueCounter = 0;
 				}
 			}
 
-			function brokenFloor(){
-				if(floorCounter == -1 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) != null){
-					crumbleFlag = 1;
-				}
-
-			}
 			function resetSwitch(){
 				if(orangeCounter == -2 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) == null){
 					orangeCounter = -1;
@@ -501,35 +369,7 @@
 				if(blueCounter == -2 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) == null){
 					blueCounter = -1;
 				}
-				if(crumbleFlag == 1 && map.getTileWorldXY(player.body.x, player.body.y,32,32,layer,false) == null){
-					crumbleFlag = 0;
-					floorCounter = 0;
-				}
 			}
-
-			function startLevel(buttonLevel){
-				level = buttonLevel.variable;
-				game.state.start("play");
-			}
-
-			function returnToMenu(){
-				game.state.start("menu");
-			}
-
-			function muteSound(){
-				if(muted){
-					muted = false;
-					muteButton.loadTexture("unmute");
-				}else{
-					muted = true;
-					muteButton.loadTexture("mute");
-				}
-			}
-
-			game = new Phaser.Game(640, 640, Phaser.AUTO, 'wrapper');
-			game.state.add("play", play_state);
-			game.state.add("menu", menu_state);
-			game.state.start("menu");
 
 		</script>
 	</head>
@@ -539,4 +379,6 @@
 			</div>
 		</div>
 	</body>
+
+<!-- Mirrored from kal-rul.com/spaced2/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 22 Dec 2016 15:44:51 GMT -->
 </html>
