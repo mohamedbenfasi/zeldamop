@@ -38,6 +38,7 @@
 			var levels = ["B-1", "B-2", "B-3", "B-4", "B-5", "Y-1", "Y-2", "Y-3", "Y-4", "Y-5", "R-1", "R-2", "R-3", "R-4", "R-5"];
 			var level = 0;
 			var levelButtons = new Array(8);
+      var music
 
 			menu_state = {
 				preload : function() {
@@ -48,6 +49,8 @@
 					$.each( levels, function( key, value ) {
 						game.load.spritesheet(value, value + '.png', 48, 48);
 					});
+          //added title screen from zeldajs
+          game.load.audio('title_screen', 'title_screen.wav')
 				},
 				create : function() {
 					game.stage.backgroundColor = '#000000';
@@ -58,7 +61,10 @@
 						muteButton.loadTexture("mute");
 					}
 
-					x = 104;
+          music = game.add.audio('title_screen');
+          music.play()
+
+          x = 104;
 					y = 300;
 					$.each( levels, function( key, value ) {
 
@@ -80,7 +86,6 @@
 							x = 104;
 						}
 					});
-
 				}
 			},
 			play_state = {
@@ -519,7 +524,6 @@
 			function muteSound(){
 				if(muted){
 					muted = false;
-					muteButton.loadTexture("unmute");
 				}else{
 					muted = true;
 					muteButton.loadTexture("mute");
@@ -534,7 +538,10 @@
 		</script>
 	</head>
 	<body class="unselectable" style="width:655px; height:655px; overflow: hidden; background: black;">
-		<div class="unselectable" tabindex="500" style="width:100%;  height: 100%;">
+    <div class="">
+      <a href="https://github.com/thefailtheory/zeldajs">FORK ME</a>
+    </div>
+    <div class="unselectable" tabindex="500" style="width:100%;  height: 100%;">
 			<div class="unselectable" id="wrapper" style="font-size: 0; width:100%; height:100%; overflow: hidden;">
 			</div>
 		</div>
